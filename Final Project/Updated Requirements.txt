@@ -1,0 +1,8 @@
+targzf <extension list> <-u>  //up to 4 different file types
+the server must return temp.tar.gz that contains all the files in its directory tree rooted at ~ belonging to the file type/s listed in the extension list, else the server sends the message “No file found” to the client (which is printed on the client terminal by the client)
+-u   unzip temp.tar.gz in the pwd of client
+The extension list must have at least one file type and can have up to six different file types( up to 4 different file types) 
+Ex: C$ targzf c txt pdf
+Another common question (What do I do with files with the same name in different folders of the directory tree?) 
+
+Skip the files with the same name and extension type (from the second occurrence) 

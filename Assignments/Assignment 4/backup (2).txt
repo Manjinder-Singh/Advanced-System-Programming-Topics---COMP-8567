@@ -1,0 +1,131 @@
+
+<<COMMENT
+Student Details:
+Name - Manjinder Singh | Student ID - 110097177 | Section - 4
+
+Assignment Details:
+Subject - Advanced System Programming | Assignment Number - 4 | Assignment Topic - Shell Scripting | 
+Language - Shell Scripting Language Bash | Date of Submission - July 26, 2023
+
+REFERENCES :
+1. LAB WORK OF ASP submitted until July 25, 2023.
+2. Class Code References shared by Doc.
+3. Class Lectures.
+4. BASH Documentation for Commands.
+COMMENT
+
+#!/bin/bash
+
+# Declaring directory paths for backups(Incremental as well as Complete Backup) along with Log file 
+dirForIncBackup="$HOME/home/backup/ib"
+dirForFullBackup="$HOME/home/backup/cb"
+locOfLogFileForBackup="$HOME/home/backup/backup.log"
+
+# Declaring initial values for naming the Backup(Incremental as well as Complete Backup) Files and logging the statements to backup.log file.
+ValForIncBackup=10001
+ValForCompleteBackup=20001
+WaitTimeinSecs=120
+
+# Declaring time format that will be referred for Logging and File Backup purposes.
+timeFormatConsideredForLogging="%a %d %b %Y %I:%M:%S %p %Z"
+timeFormatConsideredForFileBackup="%Y-%m-%d %H:%M:%S %Z"
+
+<<COMMENT
+1. In this step, we are creating directories for Backups(Full or Incremental)
+1.1 In addition to this it will create any sub directory if it is not there. In case it is already existing then it wont give any error.
+2. log file(for storing logs) will also be created if it is not there.
+COMMENT
+
+mkdir -p "$dirForFullBackup"
+mkdir -p "$dirForIncBackup"
+touch "$locOfLogFileForBackup"
+
+<<COMMENT
+FUNCTION NAME - performIncBackup
+FUNCTION PURPOSE - 
+1. Firstly, the function search for a file with extension .txt in the HOME directory that are either updated or created after the supplied timestamp.
+2. In case either newly created or updated .txt file(s) is/are found:
+2.1 Then archiving all those files into single tar file.
+2.2 Furthermore, tar file is saved in the specified directory which is created for incremental backups with the name as per pattern( 'ib' + 'current value of ValForIncBackup').
+2.3 Log entry then will be appended in the backup log file that will signify that incremental backup is saved that includes the timestamp.
+2.4 Then increasing the value for ValForIncBackup by 1 for the next incremental backup.
+3. In case there is no new or updated .txt files:
+3.1 Log entry will be made in the backup log file that will signify there were no changes in the .txt files and the incremental backup was not created.
+COMMENT
+
+performIncBackup()
+{
+  chkForAnyFileUpdates=$(find "$HOME" -type f -name "*.txt" -newermt "$2")
+  # It will check if there is any new file is created or the existing one is updated.
+  if [ -n "$chkForAnyFileUpdates" ]; then
+    # In case the above condition is true, then find operation will fetch all text files(newly created or existing ones updated) after the specified timestamp.
+    find "$HOME" -type f -name "*.txt" -newermt "$2" -print0 | tar -cf "$dirForIncBackup/ib$ValForIncBackup.tar" --null -T-
+    # Then proceeding with the appending message in the log file.
+    echo "$1  ib$ValForIncBackup.tar was created successfully. " >> "$locOfLogFileForBackup"
+    # Then incrementing the value for Incremental Backup variable ('ValForIncBackup') by 1.
+    ValForIncBackup=$((ValForIncBackup + 1))
+  else
+    # In case there is no new changes for the text file, following message will be logged in the Log file for backup.
+    echo "$1  No changes were found, so Incremental Backup was not created. " >> "$locOfLogFileForBackup"
+  fi
+}
+
+<<COMMENT
+FUNCTION NAME - performCompleteBackup
+FUNCTION PURPOSE - 
+1. Firstly, it will search for all the text(.txt) files in the HOME directory.
+2. Then, it will archive the all the text(.txt) files that have been found into a single tar file.
+2.1 Furthermore, tar file is saved in the specified directory which is created for complete backups with the name as per pattern( 'cb' + 'current value of ValForCompleteBackup').
+2.2 Log entry then will be appended in the backup log file that will signify that complete backup is saved that includes the timestamp.
+2.3 Then increasing the value for ValForCompleteBackup by 1 for the next complete backup.
+COMMENT
+
+performCompleteBackup()
+{
+  # Fetch all the text files in the entire directory root and archive them into a single tar file
+  find "$HOME" -type f -name "*.txt" -print0 | tar -cf "$dirForFullBackup/cb$ValForCompleteBackup.tar" --null -T-
+  # Append details in the log file
+  echo "$1  cb$ValForCompleteBackup.tar was created successfully." >> "$locOfLogFileForBackup"
+  # Increase the tar file backup count for the next complete backup
+  ValForCompleteBackup=$((ValForCompleteBackup + 1))
+}
+
+<<COMMENT
+For Backup process, the bash script runs continuously that performs complete as well as incremental backups of text(.txt) files in the HOME directory. 
+Following is the sequence of operations that were implemented as per Assignment 4 Requirements:-
+1. Firstly, we will be creating a complete backup of all the text(.txt) files in the HOME directory. 
+1.1 In this, we are using EDT timezone for timestamping the backup.
+1.2 Once a complete backup is created, the script will wait for 2 minutes as per requirements specified.
+2 Then the script will run for 3 incremental backups and each two minutes apart. 
+2.1 For each incremental backup, it fetches all the text(.txt) files that are either modified or newly created since the latest complete backup or any changes made since the last incremental backup.
+2.2 Again, in this, we are using EDT timezone for timestamping the backup.
+2.3 After each incremental backup, the script will be waiting for 2 minutes before starting with the next incremental backup.
+3. Then the loop continues its execution indefinitely, ensuring continous backup operations(complete as well as incremental) runs in the background(& operator ensures that).
+COMMENT
+
+# Continuous infinite loop that will keep on running in the background(& operator ensures that).
+while :; do
+  
+  # Getting Time in EDT format for logging purpose.
+  currEDTForLogging=$(TZ=EDT date +"$timeFormatConsideredForLogging")
+  # A call is made to the 'performCompleteBackup' function to perform complete backup operation for all text files in HOME directory.
+  performCompleteBackup "$currEDTForLogging"
+  # Setting current date and time in specific format "%Y-%m-%d %H:%M:%S %Z"
+  currTimeForLogging=$(date +"$timeFormatConsideredForFileBackup")
+  # It will wait for 120 seconds.
+  sleep $WaitTimeinSecs
+
+  # A call is made thrice to the 'performIncBackup' function to perform incremental backup operation for all the updated text files or newly created files since the last backup operation.
+  for i in {1..3}; do
+    # Getting Time in EDT format for logging purpose.
+    currEDTForLogging=$(TZ=EDT date +"$timeFormatConsideredForLogging")
+    # Calling the 'performIncBackup' function for Incremental Backup operation.
+    performIncBackup "$currEDTForLogging" "$currTimeForLogging"
+    # Setting current date and time in specific format "%Y-%m-%d %H:%M:%S %Z"	
+    currTimeForLogging=$(date +"$timeFormatConsideredForFileBackup")
+    # It will wait for 120 seconds for next incremental backup and once it is executed thrice then it will wait for 120 seconds to procees with complete backup process and it continues.
+    sleep $WaitTimeinSecs
+  done
+# The operator "&" ensures that the process keeps on running in the background even if the terminal is closed.
+done &
+

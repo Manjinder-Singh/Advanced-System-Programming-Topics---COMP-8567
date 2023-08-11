@@ -1,0 +1,5 @@
+check for this case:
+
+echo "1 10 5 8" | sort -n | uniq | grep '1' | wc -w
+
+it is not working. Please make changes accordingly.
