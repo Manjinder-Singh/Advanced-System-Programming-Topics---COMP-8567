@@ -1,0 +1,7 @@
+Few files in linux have no permission, so we cannnot create tar folder for those files. so we can handle that as well by either ignoring those files or having another approach.
+
+In my code we are handling by printing a message.
+
+This issue is mainly on no machine but mostly work on Virtual Machine.
+
+So that issue can be taken care of.
