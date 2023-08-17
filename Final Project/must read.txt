@@ -5,3 +5,44 @@ In my code we are handling by printing a message.
 This issue is mainly on no machine but mostly work on Virtual Machine.
 
 So that issue can be taken care of.
+
+
+commands
+
+Terminal 1:
+gcc -o server server.c
+./server
+
+Terminal 2:
+gcc -o mirror mirror.c
+./mirror
+
+Terminal 3:
+gcc -o client client.c
+./client 127.0.0.1
+
+Run on Terminal 3:
+0. you can open multiple terminals and execute ./client 127.0.0.1 to see to , it is either connectec to mirror or main server.
+1. filesrch
+filesrch client.c 
+
+2. tarfgetz
+tarfgetz 10 12
+tarfgetz 10 12 -u 
+
+3. getdirf
+getdirf 2023-08-12 2023-08-14
+getdirf 2023-08-12 2023-08-14 -u
+
+4. fgets
+fgets client.c server.c
+
+5. targzf 
+targzf tex sh docs
+
+6. quit
+
+
+
+
+
